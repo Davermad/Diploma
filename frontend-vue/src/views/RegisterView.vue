@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { useAuth } from '../composables/useAuth'
@@ -7,14 +7,21 @@ import { useAuth } from '../composables/useAuth'
 const { register } = useAuth()
 const router = useRouter()
 
-const email = ref('')
-const password = ref('')
+const formState = reactive({
+  email: '',
+  password: '',
+})
 const loading = ref(false)
+
+const passwordRules = [
+  { required: true, message: 'Введите пароль' },
+  { type: 'string', min: 8, message: 'Минимум 8 символов' },
+]
 
 async function onSubmit() {
   loading.value = true
   try {
-    await register(email.value, password.value)
+    await register(formState.email, formState.password)
     router.push('/')
   } catch (e) {
     message.error(e.message || 'Ошибка регистрации')
@@ -29,16 +36,12 @@ async function onSubmit() {
     <a-card class="auth-card" :bordered="false">
       <p class="auth-brand">Smart TODO</p>
       <h1>Регистрация</h1>
-      <a-form layout="vertical" @finish="onSubmit">
+      <a-form :model="formState" layout="vertical" @finish="onSubmit">
         <a-form-item label="Email" name="email" :rules="[{ required: true, message: 'Введите email' }]">
-          <a-input v-model:value="email" type="email" placeholder="email@example.com" size="large" />
+          <a-input v-model:value="formState.email" type="email" placeholder="email@example.com" size="large" />
         </a-form-item>
-        <a-form-item
-          label="Пароль"
-          name="password"
-          :rules="[{ required: true, message: 'Минимум 8 символов', min: 8 }]"
-        >
-          <a-input-password v-model:value="password" placeholder="Пароль" size="large" />
+        <a-form-item label="Пароль" name="password" :rules="passwordRules">
+          <a-input-password v-model:value="formState.password" placeholder="Пароль" size="large" />
         </a-form-item>
         <a-form-item>
           <a-button type="primary" html-type="submit" block size="large" :loading="loading">

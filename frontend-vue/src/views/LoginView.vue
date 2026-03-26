@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { useAuth } from '../composables/useAuth'
@@ -8,14 +8,16 @@ const { login } = useAuth()
 const router = useRouter()
 const route = useRoute()
 
-const email = ref('')
-const password = ref('')
+const formState = reactive({
+  email: '',
+  password: '',
+})
 const loading = ref(false)
 
 async function onSubmit() {
   loading.value = true
   try {
-    await login(email.value, password.value)
+    await login(formState.email, formState.password)
     const r = route.query.redirect
     router.push(typeof r === 'string' ? r : '/')
   } catch (e) {
@@ -31,12 +33,12 @@ async function onSubmit() {
     <a-card class="auth-card" :bordered="false">
       <p class="auth-brand">Smart TODO</p>
       <h1>Вход</h1>
-      <a-form layout="vertical" @finish="onSubmit">
+      <a-form :model="formState" layout="vertical" @finish="onSubmit">
         <a-form-item label="Email" name="email" :rules="[{ required: true, message: 'Введите email' }]">
-          <a-input v-model:value="email" type="email" placeholder="email@example.com" size="large" />
+          <a-input v-model:value="formState.email" type="email" placeholder="email@example.com" size="large" />
         </a-form-item>
         <a-form-item label="Пароль" name="password" :rules="[{ required: true, message: 'Введите пароль' }]">
-          <a-input-password v-model:value="password" placeholder="Пароль" size="large" />
+          <a-input-password v-model:value="formState.password" placeholder="Пароль" size="large" />
         </a-form-item>
         <a-form-item>
           <a-button type="primary" html-type="submit" block size="large" :loading="loading">Войти</a-button>
