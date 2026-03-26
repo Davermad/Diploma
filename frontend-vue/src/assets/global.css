@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap');
+
+/* Зелёная тема (Vue) — Ant Design переопределяется через ConfigProvider */
+:root {
+  --vue-bg: #f4faf6;
+  --vue-bg-accent: linear-gradient(165deg, #f7fdf9 0%, #eaf5ee 45%, #f4faf6 100%);
+  --vue-text-muted: #5c6b62;
+  --vue-border: #d4e4da;
+  --vue-surface: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.88);
+  background: var(--vue-bg);
+  background-image: var(--vue-bg-accent);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 24px 48px;
+}
+
+.page-lead {
+  font-size: 0.95rem;
+  color: var(--vue-text-muted);
+  margin: 0 0 20px;
+  max-width: 52ch;
+  line-height: 1.55;
+}
+
+.muted {
+  color: var(--vue-text-muted);
+}
+
+.main-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
