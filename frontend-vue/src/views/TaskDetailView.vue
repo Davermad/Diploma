@@ -61,6 +61,7 @@ const editForm = ref({
   deadline: '',
 })
 const savingEdit = ref(false)
+const completing = ref(false)
 
 watch(
   taskId,
@@ -202,6 +203,21 @@ function deleteTask() {
   })
 }
 
+async function completeTask() {
+  if (!task.value || task.value.status === 'DONE') return
+  completing.value = true
+  try {
+    const updated = await tasksApi.update(taskId.value, { status: 'DONE' })
+    task.value = updated
+    await load()
+    message.success('Задача выполнена')
+  } catch (e) {
+    message.error(e.message || 'Не удалось завершить задачу')
+  } finally {
+    completing.value = false
+  }
+}
+
 async function saveExecutor() {
   savingExec.value = true
   try {
@@ -231,9 +247,19 @@ async function saveExecutor() {
       <div class="hero">
         <h1>{{ task.title }}</h1>
         <CategoryBadges :items="task.categories || []" empty="Категории не заданы" />
-        <a-space v-if="canEditTask" wrap style="margin-top: 16px">
-          <a-button @click="openTaskEdit">Редактировать задачу</a-button>
-          <a-button danger @click="deleteTask">Удалить задачу</a-button>
+        <a-space wrap style="margin-top: 16px">
+          <a-button
+            v-if="user && task.status !== 'DONE'"
+            type="primary"
+            :loading="completing"
+            @click="completeTask"
+          >
+            Завершить
+          </a-button>
+          <template v-if="canEditTask">
+            <a-button @click="openTaskEdit">Редактировать задачу</a-button>
+            <a-button danger @click="deleteTask">Удалить задачу</a-button>
+          </template>
         </a-space>
       </div>
 
@@ -339,7 +365,7 @@ async function saveExecutor() {
   padding-bottom: 48px;
 }
 .back {
-  color: #178a5c;
+  color: var(--vue-primary);
   font-weight: 600;
   display: inline-block;
   margin-bottom: 16px;
@@ -349,7 +375,7 @@ async function saveExecutor() {
   padding: 22px 24px;
   border-radius: 12px;
   border: 1px solid var(--vue-border);
-  background: linear-gradient(135deg, #fff 0%, #f4faf6 100%);
+  background: linear-gradient(135deg, var(--vue-surface) 0%, var(--vue-surface-hover) 100%);
 }
 .hero h1 {
   margin-bottom: 12px;

@@ -41,7 +41,7 @@
   .modal-overlay {
     position: fixed;
     inset: 0;
-    background: color-mix(in srgb, #1a1714 42%, transparent);
+    background: var(--overlay-scrim);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     display: flex;
@@ -95,7 +95,7 @@
       color 0.15s ease;
   }
   .modal-close:hover {
-    background: var(--surface-hover, #fffaf5);
+    background: var(--surface-hover);
     color: var(--text);
   }
   .modal-close:focus-visible {

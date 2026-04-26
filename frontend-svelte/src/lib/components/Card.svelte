@@ -18,11 +18,17 @@
 <style>
   .card {
     background: var(--surface, #fff);
-    border-radius: var(--radius, 14px);
-    border: 1px solid color-mix(in srgb, var(--border) 92%, var(--text) 8%);
+    border-radius: var(--radius, 8px);
+    border: 1px solid color-mix(in srgb, var(--border) 88%, var(--text) 6%);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
-    transition: box-shadow 0.22s var(--ease-out, ease), border-color 0.22s ease;
+    transition:
+      box-shadow 0.22s var(--ease-out, ease),
+      border-color 0.22s ease;
+  }
+  .card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: color-mix(in srgb, var(--primary) 20%, var(--border));
   }
   .card-header {
     padding: 16px 22px;
@@ -30,7 +36,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(180deg, var(--surface-2, #fffdfb) 0%, var(--surface, #fff) 55%);
+    background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 55%);
   }
   .card-title {
     margin: 0;

@@ -141,6 +141,20 @@
     }
   }
 
+  let completingTaskId = $state(null);
+
+  async function completeTask(taskId) {
+    completingTaskId = taskId;
+    try {
+      await tasksApi.update(taskId, { status: 'DONE' });
+      await load();
+    } catch (err) {
+      alert(err.message || 'Не удалось завершить задачу');
+    } finally {
+      completingTaskId = null;
+    }
+  }
+
   async function createTask(e) {
     e.preventDefault();
     saving = true;
@@ -219,7 +233,19 @@
                 <span class="task-exec" title="Исполнитель">→ {task.executor.email}</span>
               {/if}
             </div>
-            <span class="task-status" title="Статус">{statusLabels[task.status] || task.status}</span>
+            <div class="task-item-right">
+              <span class="task-status" title="Статус">{statusLabels[task.status] || task.status}</span>
+              {#if $user && task.status !== 'DONE'}
+                <Button
+                  type="primary"
+                  size="sm"
+                  loading={completingTaskId === task.id}
+                  on:click={() => completeTask(task.id)}
+                >
+                  Завершить
+                </Button>
+              {/if}
+            </div>
           </div>
         {:else}
           <p class="empty">Пока нет задач — добавьте первую.</p>
@@ -379,7 +405,7 @@
     padding-bottom: 12px;
   }
   .task-item:hover {
-    background: var(--surface-hover, #fffaf5);
+    background: var(--surface-hover);
   }
   .task-main {
     display: flex;
@@ -405,6 +431,13 @@
     font-size: 12px;
     color: var(--text-muted);
     line-height: 1.4;
+  }
+  .task-item-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
   }
   .task-status {
     font-size: 11px;

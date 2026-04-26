@@ -1,11 +1,10 @@
 <script setup>
-import { computed, inject } from 'vue'
+import { computed } from 'vue'
 
 const props = defineProps({
   categories: { type: Array, default: () => [] },
 })
 const selectedIds = defineModel('selectedIds', { type: Array, default: () => [] })
-const theme = inject('appTheme', { primary: '#178a5c' })
 
 const set = computed(() => new Set(selectedIds.value))
 
@@ -53,19 +52,19 @@ function toggle(id) {
   padding: 8px 12px;
   border-radius: 999px;
   border: 1px solid var(--vue-border);
-  background: #fff;
+  background: var(--vue-surface);
   cursor: pointer;
   font: inherit;
   font-size: 13px;
   transition: border-color 0.15s, background 0.15s;
 }
 .cat-chip:hover {
-  border-color: v-bind('theme.primary');
+  border-color: var(--vue-primary);
 }
 .cat-chip.selected {
-  border-color: v-bind('theme.primary');
-  background: rgba(23, 138, 92, 0.08);
-  box-shadow: 0 0 0 1px rgba(23, 138, 92, 0.2);
+  border-color: var(--vue-primary);
+  background: color-mix(in srgb, var(--vue-primary) 10%, var(--vue-surface));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--vue-primary) 22%, transparent);
 }
 .dot {
   width: 10px;

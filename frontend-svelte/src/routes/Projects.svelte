@@ -152,9 +152,6 @@
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 22px;
   }
-  .project-card-wrap {
-    transition: transform 0.22s var(--ease-out, ease);
-  }
   .project-card-wrap :global(.card) {
     height: 100%;
     transition:
@@ -163,10 +160,7 @@
   }
   .project-card-wrap:hover :global(.card) {
     box-shadow: var(--shadow-md);
-    border-color: color-mix(in srgb, var(--primary) 18%, var(--border));
-  }
-  .project-card-wrap:hover {
-    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--primary) 20%, var(--border));
   }
   .project-desc {
     color: var(--text-muted);

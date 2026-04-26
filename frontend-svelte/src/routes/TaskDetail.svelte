@@ -129,6 +129,7 @@
     deadline: '',
   });
   let savingEdit = $state(false);
+  let completing = $state(false);
 
   const statusOpts = [
     { value: 'TODO', label: 'К выполнению' },
@@ -186,6 +187,20 @@
     }
   }
 
+  async function completeTask() {
+    if (!taskId || task?.status === 'DONE') return;
+    completing = true;
+    try {
+      const updated = await tasksApi.update(taskId, { status: 'DONE' });
+      task = updated;
+      await load();
+    } catch (e) {
+      alert(e.message || 'Не удалось завершить задачу');
+    } finally {
+      completing = false;
+    }
+  }
+
   async function saveExecutor() {
     if (!taskId) return;
     savingExec = true;
@@ -215,12 +230,17 @@
     <div class="hero">
       <h1>{task.title}</h1>
       <CategoryBadges items={task.categories || []} empty="Категории не заданы" />
-      {#if canEditTask}
-        <div class="task-admin-actions">
-          <Button type="default" size="sm" on:click={openTaskEdit}>Редактировать задачу</Button>
-          <Button type="danger" size="sm" on:click={deleteTask}>Удалить задачу</Button>
-        </div>
-      {/if}
+      <div class="task-actions-row">
+        {#if $user && task.status !== 'DONE'}
+          <Button type="primary" size="sm" on:click={completeTask} loading={completing}>Завершить</Button>
+        {/if}
+        {#if canEditTask}
+          <div class="task-admin-actions">
+            <Button type="default" size="sm" on:click={openTaskEdit}>Редактировать задачу</Button>
+            <Button type="danger" size="sm" on:click={deleteTask}>Удалить задачу</Button>
+          </div>
+        {/if}
+      </div>
     </div>
 
     <div class="grid-2">
@@ -359,11 +379,17 @@
     margin-bottom: 12px;
     font-size: clamp(1.35rem, 2.5vw, 1.75rem);
   }
+  .task-actions-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+  }
   .task-admin-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 16px;
   }
   .select {
     width: 100%;

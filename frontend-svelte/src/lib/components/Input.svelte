@@ -43,7 +43,8 @@
     box-shadow: var(--focus-ring, 0 0 0 3px rgba(224, 120, 32, 0.22));
   }
   .input:disabled {
-    background: #f5f5f5;
+    background: var(--input-disabled-bg, #f1f2f4);
     cursor: not-allowed;
+    opacity: 0.85;
   }
 </style>

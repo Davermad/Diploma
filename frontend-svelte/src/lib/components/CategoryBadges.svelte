@@ -27,8 +27,8 @@
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.02em;
-    background: color-mix(in srgb, var(--c) 12%, white);
-    color: color-mix(in srgb, var(--c) 58%, #2a2622);
+    background: color-mix(in srgb, var(--c) 14%, var(--surface));
+    color: color-mix(in srgb, var(--c) 52%, var(--text));
     border: 1px solid color-mix(in srgb, var(--c) 32%, transparent);
     box-shadow: 0 1px 2px color-mix(in srgb, var(--c) 8%, transparent);
   }

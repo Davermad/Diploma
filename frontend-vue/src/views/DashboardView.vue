@@ -90,7 +90,7 @@ onMounted(async () => {
   padding: 0 1.1rem;
   font-size: clamp(1.5rem, 4vw, 1.85rem);
   font-weight: 700;
-  color: #178a5c;
+  color: var(--vue-primary);
   background: linear-gradient(145deg, rgba(23, 138, 92, 0.12) 0%, rgba(23, 138, 92, 0.06) 100%);
   border-radius: 999px;
   border: 2px solid rgba(23, 138, 92, 0.28);

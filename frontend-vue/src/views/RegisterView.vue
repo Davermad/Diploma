@@ -68,17 +68,17 @@ async function onSubmit() {
 .auth-card {
   width: 100%;
   max-width: 420px;
-  border-radius: 14px !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.08);
+  border-radius: 8px !important;
+  box-shadow: var(--vue-shadow-card);
   border: 1px solid var(--vue-border) !important;
 }
 .auth-card::before {
   content: '';
   display: block;
-  height: 4px;
+  height: 3px;
   margin: -24px -24px 20px;
-  border-radius: 14px 14px 0 0;
-  background: linear-gradient(90deg, #0d5c3d, #178a5c, #3cb878);
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(90deg, var(--vue-primary-dark), var(--vue-primary), var(--vue-primary-light));
 }
 .auth-brand {
   margin: 0 0 6px;
@@ -87,7 +87,7 @@ async function onSubmit() {
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #178a5c;
+  color: var(--vue-primary);
 }
 h1 {
   margin: 0 0 24px;

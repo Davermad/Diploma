@@ -10,6 +10,7 @@
   import TaskDetail from './routes/TaskDetail.svelte';
   import Categories from './routes/Categories.svelte';
   import GlobalChat from './routes/GlobalChat.svelte';
+  import ThemeToggle from './lib/components/ThemeToggle.svelte';
   import { clickOutside } from './lib/actions.js';
 
   const routes = {
@@ -53,15 +54,19 @@
         <a href="#/categories">Категории</a>
         <a href="#/chat">Общий чат</a>
       </div>
-      <div class="user-menu" use:clickOutside={() => (userMenuOpen = false)}>
-        <button class="user-btn" on:click={() => (userMenuOpen = !userMenuOpen)}>
-          {$user.email} ▾
-        </button>
-        {#if userMenuOpen}
-          <div class="user-dropdown">
-            <button on:click={() => { logout(); push('/login'); userMenuOpen = false; }}>Выйти</button>
-          </div>
-        {/if}
+      <div class="nav-actions">
+        <ThemeToggle variant="onNav" />
+        <div class="user-menu" use:clickOutside={() => (userMenuOpen = false)}>
+          <button type="button" class="user-btn" on:click={() => (userMenuOpen = !userMenuOpen)}>
+            <span class="user-email">{$user.email}</span>
+            <span class="user-chevron" aria-hidden="true">▾</span>
+          </button>
+          {#if userMenuOpen}
+            <div class="user-dropdown">
+              <button type="button" on:click={() => { logout(); push('/login'); userMenuOpen = false; }}>Выйти</button>
+            </div>
+          {/if}
+        </div>
       </div>
     </nav>
     <main class="main">
@@ -70,7 +75,12 @@
       </div>
     </main>
   {:else}
-    <Router {routes} />
+    <div class="guest-shell">
+      <div class="guest-chrome">
+        <ThemeToggle variant="default" />
+      </div>
+      <Router {routes} />
+    </div>
   {/if}
 </div>
 
@@ -110,27 +120,39 @@
   .navbar {
     display: flex;
     align-items: center;
-    padding: 0 22px 0 24px;
-    min-height: 58px;
-    background: linear-gradient(125deg, #c75008 0%, var(--primary) 42%, #e8943d 100%);
-    color: white;
-    box-shadow: 0 8px 32px color-mix(in srgb, var(--primary) 28%, transparent);
+    padding: 0 20px 0 22px;
+    min-height: 56px;
+    background: var(--nav-bg);
+    color: var(--nav-control-fg);
+    box-shadow: var(--nav-shadow);
     position: sticky;
     top: 0;
     z-index: 50;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
   .logo {
     font-weight: 700;
-    font-size: 1.08rem;
+    font-size: 1.05rem;
     letter-spacing: -0.03em;
-    margin-right: 32px;
-    color: white;
+    margin-right: 28px;
+    color: var(--primary);
     text-decoration: none;
-    padding: 6px 0;
+    padding: 8px 10px 8px 4px;
+    border-radius: var(--radius-sm);
+    transition:
+      background 0.18s ease,
+      opacity 0.15s ease;
   }
   .logo:hover {
     text-decoration: none;
-    opacity: 0.94;
+    background: var(--nav-link-hover-bg);
+    opacity: 1;
+  }
+  .logo:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--nav-focus-ring);
   }
   .nav-links {
     flex: 1;
@@ -140,12 +162,12 @@
     align-items: center;
   }
   .nav-links a {
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--nav-link-fg);
     text-decoration: none;
     font-size: 0.875rem;
     font-weight: 600;
-    padding: 8px 14px;
-    border-radius: 999px;
+    padding: 9px 14px;
+    border-radius: var(--radius-sm);
     border: 1px solid transparent;
     transition:
       background 0.18s var(--ease-out, ease),
@@ -153,19 +175,33 @@
       color 0.15s ease;
   }
   .nav-links a:hover {
-    color: white;
+    color: var(--primary-dark);
     text-decoration: none;
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: var(--nav-link-hover-bg);
+    border-color: var(--nav-link-hover-border);
+  }
+  .nav-links a:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--nav-focus-ring);
+  }
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 12px;
   }
   .user-menu {
     position: relative;
   }
   .user-btn {
-    background: rgba(255, 255, 255, 0.16);
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    color: white;
-    padding: 9px 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: min(240px, 36vw);
+    background: var(--nav-control-bg);
+    border: 1px solid var(--nav-control-border);
+    color: var(--nav-control-fg);
+    padding: 8px 14px;
     border-radius: var(--radius-sm);
     cursor: pointer;
     font-size: 0.8125rem;
@@ -176,13 +212,23 @@
       border-color 0.18s ease,
       box-shadow 0.18s ease;
   }
+  .user-email {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .user-chevron {
+    flex-shrink: 0;
+    opacity: 0.85;
+    font-size: 0.7rem;
+  }
   .user-btn:hover {
-    background: rgba(255, 255, 255, 0.26);
-    border-color: rgba(255, 255, 255, 0.38);
+    background: var(--nav-control-bg-hover);
+    border-color: var(--nav-control-border-hover);
   }
   .user-btn:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35);
+    box-shadow: 0 0 0 3px var(--nav-focus-ring);
   }
   .user-dropdown {
     position: absolute;
@@ -212,7 +258,7 @@
     transition: background 0.15s ease;
   }
   .user-dropdown button:hover {
-    background: var(--surface-hover, #fffaf5);
+    background: var(--surface-hover);
   }
   .user-dropdown button:focus-visible {
     outline: none;
@@ -225,5 +271,15 @@
   .main-inner {
     max-width: 1200px;
     margin: 0 auto;
+  }
+  .guest-shell {
+    position: relative;
+    min-height: 100vh;
+  }
+  .guest-chrome {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 40;
   }
 </style>

@@ -21,6 +21,7 @@ defineProps({
 
 <style scoped>
 .page-card {
-  border-radius: 12px !important;
+  border-radius: 8px !important;
+  border-color: var(--vue-border) !important;
 }
 </style>

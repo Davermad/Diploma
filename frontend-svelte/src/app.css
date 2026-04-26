@@ -1,33 +1,106 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap');
 
-:root {
-  --primary: #e07820;
-  --primary-dark: #c45f12;
-  --primary-light: #f4a742;
+/*
+ * Smart TODO — Svelte: палитра с оранжевым акцентом.
+ * Визуальный язык в духе Loops (stone, тонкие границы, мягкий свет): https://loops.so/
+ */
+:root,
+:root[data-theme='light'] {
+  --primary: #ea580c;
+  --primary-dark: #c2410c;
+  --primary-light: #fb923c;
   --primary-glow: color-mix(in srgb, var(--primary) 28%, transparent);
-  --bg: #faf7f2;
-  --bg-accent: linear-gradient(165deg, #fff9f2 0%, #f5efe6 45%, #faf7f2 100%);
+
+  --bg: #fafaf9;
+  --bg-accent:
+    radial-gradient(ellipse 100% 70% at 50% -30%, color-mix(in srgb, var(--primary) 9%, transparent), transparent 52%),
+    linear-gradient(180deg, #fafaf9 0%, #f5f5f4 100%);
+
   --surface: #ffffff;
-  --surface-2: #fffdfb;
-  --surface-hover: #fffaf5;
-  --text: #1a1714;
-  --text-muted: #6b6560;
-  --border: #e8e0d6;
-  --danger: #c23b3b;
-  --danger-soft: #fdf4f4;
-  --danger-border: color-mix(in srgb, var(--danger) 28%, var(--border));
-  --shadow-sm: 0 1px 2px rgba(26, 23, 20, 0.06);
-  --shadow-md: 0 8px 28px rgba(26, 23, 20, 0.08);
-  --shadow-lg: 0 16px 48px rgba(26, 23, 20, 0.1);
-  --shadow-button: 0 2px 8px color-mix(in srgb, var(--primary) 22%, transparent);
-  --shadow-nav: 0 1px 0 rgba(255, 255, 255, 0.12) inset;
-  --radius: 14px;
-  --radius-sm: 10px;
+  --surface-2: #fafaf9;
+  --surface-hover: #f5f5f4;
+
+  --text: #1c1917;
+  --text-muted: #78716c;
+  --border: #e7e5e4;
+
+  --danger: #dc2626;
+  --danger-soft: #fef2f2;
+  --danger-border: color-mix(in srgb, var(--danger) 25%, var(--border));
+
+  --overlay-scrim: color-mix(in srgb, #1c1917 45%, transparent);
+  --input-disabled-bg: #f5f5f4;
+
+  /* Шапка: светлая «панель», без градиента */
+  --nav-bg: color-mix(in srgb, var(--surface) 92%, var(--surface-2) 8%);
+  --nav-shadow: 0 1px 0 color-mix(in srgb, var(--text) 7%, transparent);
+  --nav-link-fg: #44403c;
+  --nav-link-hover-bg: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  --nav-link-hover-border: color-mix(in srgb, var(--primary) 25%, var(--border));
+  --nav-control-bg: var(--surface);
+  --nav-control-bg-hover: var(--surface-hover);
+  --nav-control-border: var(--border);
+  --nav-control-border-hover: color-mix(in srgb, var(--primary) 30%, var(--border));
+  --nav-control-fg: #292524;
+  --nav-focus-ring: color-mix(in srgb, var(--primary) 32%, transparent);
+
+  --shadow-sm: 0 1px 2px color-mix(in srgb, var(--text) 6%, transparent);
+  --shadow-md: 0 6px 24px color-mix(in srgb, var(--text) 8%, transparent);
+  --shadow-lg: 0 16px 48px color-mix(in srgb, var(--text) 10%, transparent);
+  --shadow-button: 0 1px 3px color-mix(in srgb, var(--primary) 22%, transparent);
+
+  --radius: 8px;
+  --radius-sm: 6px;
   --radius-xs: 6px;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --focus-ring: 0 0 0 3px var(--primary-glow);
-  --sans: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--primary-glow);
+
+  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+:root[data-theme='dark'] {
+  --primary: #fb923c;
+  --primary-dark: #f97316;
+  --primary-light: #fdba74;
+  --primary-glow: color-mix(in srgb, var(--primary) 32%, transparent);
+
+  --bg: #1c1917;
+  --bg-accent:
+    radial-gradient(ellipse 90% 60% at 50% -25%, color-mix(in srgb, var(--primary) 12%, transparent), transparent 50%),
+    linear-gradient(180deg, #1c1917 0%, #171412 100%);
+
+  --surface: #292524;
+  --surface-2: #32302f;
+  --surface-hover: #3f3a36;
+
+  --text: #e7e5e4;
+  --text-muted: #a8a29e;
+  --border: #44403c;
+
+  --danger: #f87171;
+  --danger-soft: color-mix(in srgb, var(--danger) 12%, var(--surface));
+  --danger-border: color-mix(in srgb, var(--danger) 32%, var(--border));
+
+  --overlay-scrim: rgba(0, 0, 0, 0.55);
+  --input-disabled-bg: #3f3a36;
+
+  --nav-bg: #292524;
+  --nav-shadow: 0 1px 0 color-mix(in srgb, #fff 8%, transparent);
+  --nav-link-fg: #d6d3d1;
+  --nav-link-hover-bg: color-mix(in srgb, var(--primary) 12%, var(--surface));
+  --nav-link-hover-border: color-mix(in srgb, var(--primary) 28%, var(--border));
+  --nav-control-bg: #1c1917;
+  --nav-control-bg-hover: #292524;
+  --nav-control-border: #57534e;
+  --nav-control-border-hover: color-mix(in srgb, var(--primary) 35%, #57534e);
+  --nav-control-fg: #f5f5f4;
+  --nav-focus-ring: color-mix(in srgb, var(--primary) 40%, transparent);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.22);
+  --shadow-md: 0 8px 28px rgba(0, 0, 0, 0.32);
+  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.42);
+  --shadow-button: 0 1px 4px color-mix(in srgb, var(--primary) 25%, transparent);
 }
 
 * {
@@ -49,11 +122,16 @@ body {
 a {
   color: var(--primary);
   text-decoration: none;
+  border-radius: var(--radius-xs);
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
 }
 
 a:hover {
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
+  color: var(--primary-dark);
 }
 
 h1,
@@ -61,12 +139,12 @@ h2,
 h3 {
   margin: 0;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   color: var(--text);
 }
 
 h1 {
-  font-size: 1.65rem;
+  font-size: 1.625rem;
 }
 
 .page-shell {
@@ -76,7 +154,7 @@ h1 {
 }
 
 .page-lead {
-  font-size: 0.95rem;
+  font-size: 0.9375rem;
   color: var(--text-muted);
   margin: 0 0 20px;
   max-width: 52ch;
@@ -89,5 +167,5 @@ h1 {
 
 .skeleton-text {
   color: var(--text-muted);
-  font-size: 0.95rem;
+  font-size: 0.9375rem;
 }

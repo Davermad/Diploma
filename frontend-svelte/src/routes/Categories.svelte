@@ -10,11 +10,11 @@
   let list = [];
   let loading = true;
   let modalOpen = false;
-  let form = { name: '', color: '#e07820' };
+  let form = { name: '', color: '#ea580c' };
   let saving = false;
 
   let editOpen = false;
-  let editForm = { id: '', name: '', color: '#e07820' };
+  let editForm = { id: '', name: '', color: '#ea580c' };
   let savingEdit = false;
 
   onMount(load);
@@ -35,7 +35,7 @@
     try {
       await categoriesApi.create(form);
       modalOpen = false;
-      form = { name: '', color: '#e07820' };
+      form = { name: '', color: '#ea580c' };
       await load();
     } catch (err) {
       alert(err.message);

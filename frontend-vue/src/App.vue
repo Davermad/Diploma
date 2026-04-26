@@ -1,16 +1,14 @@
 <script setup>
-import { ref, provide } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { theme as antTheme } from 'ant-design-vue'
 import { useAuth } from './composables/useAuth'
-import HelpPanel from './components/HelpPanel.vue'
-
-/** Provide / Inject (ТЗ Vue): тема для дочерних компонентов */
-provide('appTheme', { primary: '#178a5c' })
+import { themeMode } from './composables/appTheme'
+import ThemeToggle from './components/ThemeToggle.vue'
 
 const { user, logout } = useAuth()
 const router = useRouter()
 const userMenuOpen = ref(false)
-const helpOpen = ref(false)
 
 function doLogout() {
   userMenuOpen.value = false
@@ -18,18 +16,50 @@ function doLogout() {
   router.push('/login')
 }
 
-const greenTheme = {
-  token: {
-    colorPrimary: '#178a5c',
-    colorLink: '#1a9d6a',
-    borderRadius: 10,
-    fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
-  },
-}
+const antDesignTheme = computed(() => {
+  const light = {
+    token: {
+      colorPrimary: '#16a34a',
+      colorLink: '#15803d',
+      colorSuccess: '#16a34a',
+      borderRadius: 6,
+      colorBorder: '#e7e5e4',
+      colorBgContainer: '#ffffff',
+      colorBgElevated: '#ffffff',
+      colorText: '#1c1917',
+      colorTextSecondary: '#78716c',
+      colorBgLayout: '#fafaf9',
+      fontFamily: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
+      boxShadow: '0 1px 2px rgba(28, 25, 23, 0.06)',
+      boxShadowSecondary: '0 6px 24px rgba(28, 25, 23, 0.08)',
+    },
+  }
+  if (themeMode.value === 'dark') {
+    return {
+      algorithm: antTheme.darkAlgorithm,
+      token: {
+        colorPrimary: '#22c55e',
+        colorLink: '#86efac',
+        colorSuccess: '#22c55e',
+        borderRadius: 6,
+        colorBorder: '#44403c',
+        colorBgContainer: '#292524',
+        colorBgElevated: '#32302f',
+        colorText: '#e7e5e4',
+        colorTextSecondary: '#a8a29e',
+        colorBgLayout: '#1c1917',
+        fontFamily: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
+        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+        boxShadowSecondary: '0 8px 28px rgba(0, 0, 0, 0.35)',
+      },
+    }
+  }
+  return light
+})
 </script>
 
 <template>
-  <a-config-provider :theme="greenTheme">
+  <a-config-provider :theme="antDesignTheme">
     <div class="app-root">
       <template v-if="user">
         <header class="app-navbar">
@@ -39,14 +69,16 @@ const greenTheme = {
             <router-link to="/projects">Проекты</router-link>
             <router-link to="/categories">Категории</router-link>
             <router-link to="/chat">Общий чат</router-link>
-            <a-button type="link" class="help-link" @click="helpOpen = true">Справка</a-button>
           </nav>
-          <div v-click-outside="() => (userMenuOpen = false)" class="user-menu">
-            <a-button type="text" class="user-btn" @click.stop="userMenuOpen = !userMenuOpen">
-              {{ user.email }} ▾
-            </a-button>
-            <div v-show="userMenuOpen" class="user-dropdown">
-              <button type="button" class="dropdown-item" @click="doLogout">Выйти</button>
+          <div class="nav-actions">
+            <ThemeToggle />
+            <div v-click-outside="() => (userMenuOpen = false)" class="user-menu">
+              <a-button type="text" class="user-btn" @click.stop="userMenuOpen = !userMenuOpen">
+                {{ user.email }} ▾
+              </a-button>
+              <div v-show="userMenuOpen" class="user-dropdown">
+                <button type="button" class="dropdown-item" @click="doLogout">Выйти</button>
+              </div>
             </div>
           </div>
         </header>
@@ -56,10 +88,13 @@ const greenTheme = {
           </div>
         </main>
       </template>
-      <router-view v-else />
+      <div v-else class="guest-shell">
+        <div class="guest-chrome">
+          <ThemeToggle />
+        </div>
+        <router-view />
+      </div>
     </div>
-
-    <HelpPanel v-model:open="helpOpen" />
   </a-config-provider>
 </template>
 
@@ -70,22 +105,31 @@ const greenTheme = {
 .app-navbar {
   display: flex;
   align-items: center;
-  padding: 0 22px 0 24px;
-  min-height: 58px;
-  background: linear-gradient(125deg, #0d5c3d 0%, #178a5c 42%, #3cb878 100%);
-  color: #fff;
-  box-shadow: 0 8px 28px rgba(23, 138, 92, 0.28);
+  padding: 0 20px 0 22px;
+  min-height: 56px;
+  background: color-mix(in srgb, var(--vue-surface) 92%, var(--vue-bg) 8%);
+  color: var(--vue-text);
+  border-bottom: 1px solid var(--vue-border);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--vue-text) 6%, transparent);
   position: sticky;
   top: 0;
   z-index: 100;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 .logo {
   font-weight: 700;
-  font-size: 1.08rem;
+  font-size: 1.05rem;
   letter-spacing: -0.03em;
   margin-right: 28px;
-  color: #fff !important;
+  color: var(--vue-primary) !important;
   text-decoration: none !important;
+  padding: 8px 10px 8px 4px;
+  border-radius: 6px;
+  transition: background 0.18s ease;
+}
+.logo:hover {
+  background: color-mix(in srgb, var(--vue-primary) 8%, var(--vue-surface)) !important;
 }
 .nav-links {
   flex: 1;
@@ -95,45 +139,58 @@ const greenTheme = {
   align-items: center;
 }
 .nav-links a {
-  color: rgba(255, 255, 255, 0.92);
+  color: var(--vue-nav-hover-fg);
   text-decoration: none;
   font-size: 0.875rem;
   font-weight: 600;
-  padding: 8px 14px;
-  border-radius: 999px;
+  padding: 9px 14px;
+  border-radius: 6px;
   border: 1px solid transparent;
-  transition: background 0.18s ease, border-color 0.18s ease;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.15s ease;
 }
 .nav-links a:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--vue-primary-dark);
+  background: color-mix(in srgb, var(--vue-primary) 8%, var(--vue-surface));
+  border-color: color-mix(in srgb, var(--vue-primary) 22%, var(--vue-border));
 }
 .nav-links a.router-link-active {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.25);
+  color: var(--vue-primary-dark);
+  background: color-mix(in srgb, var(--vue-primary) 10%, var(--vue-surface));
+  border-color: color-mix(in srgb, var(--vue-primary) 28%, var(--vue-border));
 }
-.help-link {
-  color: rgba(255, 255, 255, 0.95) !important;
-  font-weight: 600;
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 12px;
 }
 .user-menu {
   position: relative;
 }
 .user-btn {
-  color: #fff !important;
-  background: rgba(255, 255, 255, 0.16) !important;
-  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  color: var(--vue-text) !important;
+  background: var(--vue-surface) !important;
+  border: 1px solid var(--vue-border) !important;
+  border-radius: 6px !important;
+  height: auto !important;
+  padding: 8px 14px !important;
+}
+.user-btn:hover {
+  background: var(--vue-surface-hover) !important;
+  border-color: color-mix(in srgb, var(--vue-primary) 28%, var(--vue-border)) !important;
 }
 .user-dropdown {
   position: absolute;
   top: 100%;
   right: 0;
   margin-top: 10px;
-  background: #fff;
-  border-radius: 10px;
+  background: var(--vue-surface);
+  border-radius: 6px;
   border: 1px solid var(--vue-border);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--vue-shadow-card);
   min-width: 160px;
   overflow: hidden;
 }
@@ -147,12 +204,24 @@ const greenTheme = {
   text-align: left;
   font-size: 0.875rem;
   font-family: inherit;
+  color: var(--vue-text);
+  transition: background 0.15s ease;
 }
 .dropdown-item:hover {
-  background: #f4faf6;
+  background: var(--vue-surface-hover);
 }
 .main {
   padding: 0;
-  min-height: calc(100vh - 58px);
+  min-height: calc(100vh - 56px);
+}
+.guest-shell {
+  position: relative;
+  min-height: 100vh;
+}
+.guest-chrome {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 40;
 }
 </style>

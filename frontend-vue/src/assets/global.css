@@ -1,12 +1,42 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap');
 
-/* Зелёная тема (Vue) — Ant Design переопределяется через ConfigProvider */
-:root {
-  --vue-bg: #f4faf6;
-  --vue-bg-accent: linear-gradient(165deg, #f7fdf9 0%, #eaf5ee 45%, #f4faf6 100%);
-  --vue-text-muted: #5c6b62;
-  --vue-border: #d4e4da;
+/*
+ * Smart TODO — Vue: зелёный акцент.
+ * Тот же визуальный язык, что и Svelte (Loops / stone): https://loops.so/
+ */
+:root,
+:root[data-theme='light'] {
+  --vue-primary: #16a34a;
+  --vue-primary-dark: #15803d;
+  --vue-primary-light: #22c55e;
+  --vue-bg: #fafaf9;
+  --vue-bg-accent:
+    radial-gradient(ellipse 100% 70% at 50% -30%, color-mix(in srgb, var(--vue-primary) 8%, transparent), transparent 52%),
+    linear-gradient(180deg, #fafaf9 0%, #f5f5f4 100%);
   --vue-surface: #ffffff;
+  --vue-surface-hover: #f5f5f4;
+  --vue-text: #1c1917;
+  --vue-text-muted: #78716c;
+  --vue-border: #e7e5e4;
+  --vue-nav-hover-fg: #44403c;
+  --vue-shadow-card: 0 1px 2px color-mix(in srgb, var(--vue-text) 6%, transparent), 0 12px 40px color-mix(in srgb, var(--vue-text) 7%, transparent);
+}
+
+:root[data-theme='dark'] {
+  --vue-primary: #22c55e;
+  --vue-primary-dark: #16a34a;
+  --vue-primary-light: #4ade80;
+  --vue-bg: #1c1917;
+  --vue-bg-accent:
+    radial-gradient(ellipse 90% 60% at 50% -25%, color-mix(in srgb, var(--vue-primary) 12%, transparent), transparent 50%),
+    linear-gradient(180deg, #1c1917 0%, #171412 100%);
+  --vue-surface: #292524;
+  --vue-surface-hover: #3f3a36;
+  --vue-text: #e7e5e4;
+  --vue-text-muted: #a8a29e;
+  --vue-border: #44403c;
+  --vue-nav-hover-fg: #d6d3d1;
+  --vue-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.22), 0 12px 40px rgba(0, 0, 0, 0.32);
 }
 
 * {
@@ -15,10 +45,10 @@
 
 body {
   margin: 0;
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   font-size: 15px;
   line-height: 1.5;
-  color: rgba(0, 0, 0, 0.88);
+  color: var(--vue-text);
   background: var(--vue-bg);
   background-image: var(--vue-bg-accent);
   background-attachment: fixed;
@@ -32,7 +62,7 @@ body {
 }
 
 .page-lead {
-  font-size: 0.95rem;
+  font-size: 0.9375rem;
   color: var(--vue-text-muted);
   margin: 0 0 20px;
   max-width: 52ch;
@@ -46,4 +76,44 @@ body {
 .main-inner {
   max-width: 1200px;
   margin: 0 auto;
+}
+
+/* Плоские кнопки Ant Design: без градиента и без видимой обводки */
+.ant-btn.ant-btn-primary {
+  background: var(--vue-primary) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+.ant-btn.ant-btn-primary:not(:disabled):hover {
+  background: var(--vue-primary-dark) !important;
+  color: #fff !important;
+}
+.ant-btn.ant-btn-primary:not(:disabled):active {
+  background: color-mix(in srgb, var(--vue-primary-dark) 85%, #000) !important;
+}
+
+.ant-btn.ant-btn-default:not(.ant-btn-dangerous) {
+  background: var(--vue-surface-hover) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+.ant-btn.ant-btn-default:not(.ant-btn-dangerous):not(:disabled):hover {
+  background: color-mix(in srgb, var(--vue-primary) 10%, var(--vue-surface-hover)) !important;
+  color: var(--vue-primary-dark) !important;
+}
+
+.ant-btn.ant-btn-default.ant-btn-dangerous {
+  background: color-mix(in srgb, #dc2626 12%, var(--vue-surface)) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  color: #dc2626 !important;
+}
+.ant-btn.ant-btn-default.ant-btn-dangerous:not(:disabled):hover {
+  background: #dc2626 !important;
+  color: #fff !important;
+}
+
+:root[data-theme='dark'] .ant-btn.ant-btn-default.ant-btn-dangerous {
+  background: color-mix(in srgb, #f87171 14%, var(--vue-surface)) !important;
+  color: #f87171 !important;
 }

@@ -71,7 +71,7 @@
     padding: 36px 36px 32px;
     border-radius: var(--radius);
     border: 1px solid var(--border);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-md);
     overflow: hidden;
   }
   .register-box::before {
@@ -80,7 +80,7 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 4px;
+    height: 3px;
     background: linear-gradient(90deg, var(--primary-dark), var(--primary), var(--primary-light));
   }
   .auth-brand {

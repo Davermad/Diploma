@@ -30,6 +30,7 @@ const taskForm = ref({
   executor_id: null,
 })
 const saving = ref(false)
+const completingTaskId = ref(null)
 
 const statusOpts = [
   { value: 'TODO', label: 'К выполнению' },
@@ -65,6 +66,19 @@ watch(
   },
   { immediate: true }
 )
+
+async function completeTaskRow(taskId) {
+  completingTaskId.value = taskId
+  try {
+    await tasksApi.update(taskId, { status: 'DONE' })
+    message.success('Задача выполнена')
+    await load()
+  } catch (e) {
+    message.error(e.message || 'Не удалось завершить задачу')
+  } finally {
+    completingTaskId.value = null
+  }
+}
 
 async function load() {
   const id = projectId.value
@@ -233,7 +247,18 @@ async function saveProject() {
                 <CategoryBadges :items="task.categories || []" empty="Без категорий" />
                 <span v-if="task.executor" class="task-exec">→ {{ task.executor.email }}</span>
               </div>
-              <span class="task-status">{{ statusLabels[task.status] || task.status }}</span>
+              <div class="task-item-right">
+                <span class="task-status">{{ statusLabels[task.status] || task.status }}</span>
+                <a-button
+                  v-if="user && task.status !== 'DONE'"
+                  type="primary"
+                  size="small"
+                  :loading="completingTaskId === task.id"
+                  @click="completeTaskRow(task.id)"
+                >
+                  Завершить
+                </a-button>
+              </div>
             </div>
             <p v-if="!tasks.length" class="muted">Пока нет задач — добавьте первую.</p>
           </PageCard>
@@ -319,7 +344,7 @@ async function saveProject() {
   padding-bottom: 48px;
 }
 .back {
-  color: #178a5c;
+  color: var(--vue-primary);
   font-size: 0.875rem;
   font-weight: 600;
   margin-bottom: 10px;
@@ -358,7 +383,14 @@ async function saveProject() {
   border-bottom: 1px solid var(--vue-border);
 }
 .task-item:hover {
-  background: rgba(23, 138, 92, 0.06);
+  background: color-mix(in srgb, var(--vue-primary) 6%, var(--vue-surface));
+}
+.task-item-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
 }
 .task-title {
   font-weight: 600;

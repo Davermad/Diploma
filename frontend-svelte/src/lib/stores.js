@@ -1,5 +1,43 @@
 import { writable, derived } from 'svelte/store';
 
+const THEME_STORAGE_KEY = 'smart-todo-theme';
+
+/** @returns {'light' | 'dark'} */
+function readStoredTheme() {
+  if (typeof window === 'undefined') return 'light';
+  try {
+    const t = localStorage.getItem(THEME_STORAGE_KEY);
+    if (t === 'dark' || t === 'light') return t;
+  } catch {
+    /* ignore */
+  }
+  return 'light';
+}
+
+function applyThemeToDocument(/** @type {'light' | 'dark'} */ t) {
+  if (typeof document === 'undefined') return;
+  document.documentElement.dataset.theme = t;
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, t);
+  } catch {
+    /* ignore */
+  }
+}
+
+const initialTheme = readStoredTheme();
+applyThemeToDocument(initialTheme);
+
+/** Светлая / тёмная тема (stone + оранжевый акцент Svelte, стиль близкий к Loops) */
+export const theme = writable(/** @type {'light' | 'dark'} */ (initialTheme));
+
+theme.subscribe((t) => {
+  applyThemeToDocument(t);
+});
+
+export function toggleTheme() {
+  theme.update((t) => (t === 'dark' ? 'light' : 'dark'));
+}
+
 export const location = writable(typeof window !== 'undefined' ? (window.location.hash.slice(1) || '/').split('?')[0] : '/');
 if (typeof window !== 'undefined') {
   window.addEventListener('hashchange', () => {

@@ -96,7 +96,11 @@
     font-weight: 700;
     letter-spacing: -0.04em;
     color: var(--primary);
-    background: linear-gradient(145deg, color-mix(in srgb, var(--primary) 12%, white) 0%, color-mix(in srgb, var(--primary) 6%, white) 100%);
+    background: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--primary) 14%, var(--surface)) 0%,
+      color-mix(in srgb, var(--primary) 8%, var(--surface)) 100%
+    );
     border-radius: 999px;
     border: 2px solid color-mix(in srgb, var(--primary) 28%, transparent);
     box-shadow: 0 4px 16px color-mix(in srgb, var(--primary) 15%, transparent);

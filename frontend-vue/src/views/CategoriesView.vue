@@ -7,10 +7,10 @@ import PageCard from '../components/PageCard.vue'
 const list = ref([])
 const loading = ref(true)
 const modalOpen = ref(false)
-const form = ref({ name: '', color: '#178a5c' })
+const form = ref({ name: '', color: '#16a34a' })
 const saving = ref(false)
 const editOpen = ref(false)
-const editForm = ref({ id: '', name: '', color: '#178a5c' })
+const editForm = ref({ id: '', name: '', color: '#16a34a' })
 const savingEdit = ref(false)
 
 onMounted(load)
@@ -34,7 +34,7 @@ async function createCat() {
   try {
     await categoriesApi.create(form.value)
     modalOpen.value = false
-    form.value = { name: '', color: '#178a5c' }
+    form.value = { name: '', color: '#16a34a' }
     await load()
     message.success('Категория создана')
   } catch (err) {
