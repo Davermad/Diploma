@@ -34,7 +34,7 @@
 </script>
 
 <svelte:head>
-  <title>Smart TODO — Svelte</title>
+  <title>Pulse — Svelte</title>
 </svelte:head>
 
 <div class="app">
@@ -46,29 +46,31 @@
       </div>
     </div>
   {:else if $user}
-    <nav class="navbar">
-      <a href="#/" class="logo">Smart TODO</a>
-      <div class="nav-links">
-        <a href="#/">Дашборд</a>
-        <a href="#/projects">Проекты</a>
-        <a href="#/categories">Категории</a>
-        <a href="#/chat">Общий чат</a>
-      </div>
-      <div class="nav-actions">
-        <ThemeToggle variant="onNav" />
-        <div class="user-menu" use:clickOutside={() => (userMenuOpen = false)}>
-          <button type="button" class="user-btn" on:click={() => (userMenuOpen = !userMenuOpen)}>
-            <span class="user-email">{$user.email}</span>
-            <span class="user-chevron" aria-hidden="true">▾</span>
-          </button>
-          {#if userMenuOpen}
-            <div class="user-dropdown">
-              <button type="button" on:click={() => { logout(); push('/login'); userMenuOpen = false; }}>Выйти</button>
-            </div>
-          {/if}
+    <header class="sv-topnav">
+      <div class="sv-topnav-inner">
+        <a href="#/" class="sv-brand">pulse<span>svelte</span></a>
+        <nav class="sv-pills">
+          <a href="#/" class:sv-active={$location === '/' }>Лента</a>
+          <a href="#/projects" class:sv-active={$location.startsWith('/projects')}>Проекты</a>
+          <a href="#/categories" class:sv-active={$location.startsWith('/categories')}>Метки</a>
+          <a href="#/chat" class:sv-active={$location.startsWith('/chat')}>Чат</a>
+        </nav>
+        <div class="nav-actions">
+          <ThemeToggle variant="onNav" />
+          <div class="user-menu" use:clickOutside={() => (userMenuOpen = false)}>
+            <button type="button" class="user-btn" on:click={() => (userMenuOpen = !userMenuOpen)}>
+              <span class="user-email">{$user.display_name || $user.email}</span>
+              <span class="user-chevron" aria-hidden="true">▾</span>
+            </button>
+            {#if userMenuOpen}
+              <div class="user-dropdown">
+                <button type="button" on:click={() => { logout(); push('/login'); userMenuOpen = false; }}>Выйти</button>
+              </div>
+            {/if}
+          </div>
         </div>
       </div>
-    </nav>
+    </header>
     <main class="main">
       <div class="main-inner">
         <Router {routes} />
@@ -117,78 +119,72 @@
       transform: rotate(360deg);
     }
   }
-  .navbar {
-    display: flex;
-    align-items: center;
-    padding: 0 20px 0 22px;
-    min-height: 56px;
-    background: var(--nav-bg);
-    color: var(--nav-control-fg);
-    box-shadow: var(--nav-shadow);
+  .sv-topnav {
     position: sticky;
     top: 0;
     z-index: 50;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 12px 40px color-mix(in srgb, var(--text) 6%, transparent);
   }
-  .logo {
-    font-weight: 700;
-    font-size: 1.05rem;
-    letter-spacing: -0.03em;
-    margin-right: 28px;
+  .sv-topnav-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .sv-brand {
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: -0.05em;
+    color: var(--text);
+    text-decoration: none;
+    margin-right: 8px;
+  }
+  .sv-brand span {
     color: var(--primary);
-    text-decoration: none;
-    padding: 8px 10px 8px 4px;
-    border-radius: var(--radius-sm);
-    transition:
-      background 0.18s ease,
-      opacity 0.15s ease;
+    margin-left: 2px;
   }
-  .logo:hover {
-    text-decoration: none;
-    background: var(--nav-link-hover-bg);
-    opacity: 1;
-  }
-  .logo:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px var(--nav-focus-ring);
-  }
-  .nav-links {
+  .sv-pills {
     flex: 1;
     display: flex;
     flex-wrap: wrap;
-    gap: 6px 10px;
-    align-items: center;
+    gap: 8px;
+    justify-content: center;
   }
-  .nav-links a {
-    color: var(--nav-link-fg);
+  .sv-pills a {
     text-decoration: none;
-    font-size: 0.875rem;
-    font-weight: 600;
-    padding: 9px 14px;
-    border-radius: var(--radius-sm);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 999px;
     border: 1px solid transparent;
+    color: var(--nav-link-fg);
     transition:
-      background 0.18s var(--ease-out, ease),
+      background 0.18s ease,
       border-color 0.18s ease,
       color 0.15s ease;
   }
-  .nav-links a:hover {
-    color: var(--primary-dark);
-    text-decoration: none;
+  .sv-pills a:hover {
     background: var(--nav-link-hover-bg);
     border-color: var(--nav-link-hover-border);
+    color: var(--primary-dark);
   }
-  .nav-links a:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px var(--nav-focus-ring);
+  .sv-pills a.sv-active {
+    background: color-mix(in srgb, var(--primary) 14%, var(--surface));
+    border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+    color: var(--primary-dark);
   }
   .nav-actions {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-left: 12px;
+    margin-left: auto;
   }
   .user-menu {
     position: relative;
@@ -269,8 +265,9 @@
     min-height: calc(100vh - 56px);
   }
   .main-inner {
-    max-width: 1200px;
+    max-width: 1180px;
     margin: 0 auto;
+    padding: 0 16px;
   }
   .guest-shell {
     position: relative;

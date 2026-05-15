@@ -1,39 +1,40 @@
-services:
-  backend:
-    build: ./backend
-    ports:
-      - "4000:4000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:password123@postgres:5432/diplom_db?schema=public
-    depends_on:
-      - postgres
-
-  postgres:
-    image: postgres:17
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password123
-      POSTGRES_DB: diplom_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
-
-  # Svelte (Vite): http://localhost:5173 — запросы API с браузера на http://localhost:4000
-  frontend-svelte:
-    build:
-      context: ./frontend-svelte
-      dockerfile: Dockerfile
-    ports:
-      - "5173:5173"
-    environment:
-      - VITE_API_URL=http://localhost:4000
-    volumes:
-      - ./frontend-svelte:/app
-      - frontend_svelte_node_modules:/app/node_modules
-    depends_on:
-      - backend
-
-volumes:
-  db_data:
-  frontend_svelte_node_modules:
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "4000:4000"
+    environment:
+      # async SQLAlchemy требует драйвер asyncpg (не просто postgresql://)
+      - DATABASE_URL=postgresql+asyncpg://postgres:password123@postgres:5432/diplom_db
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: diplom_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  # Svelte (Vite): http://localhost:5173 — запросы API с браузера на http://localhost:4000
+  frontend-svelte:
+    build:
+      context: ./frontend-svelte
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:4000
+    volumes:
+      - ./frontend-svelte:/app
+      - frontend_svelte_node_modules:/app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
+  frontend_svelte_node_modules:

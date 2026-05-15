@@ -7,16 +7,9 @@ from app.db.config import get_db
 from app.models.base import Task, TaskComment, User
 from app.schemas.schemas import TaskCommentUpdate, TaskComment as TaskCommentSchema
 from app.api.auth import get_current_user
+from app.services.task_access import user_can_access_task
 
 router = APIRouter(prefix="/comments", tags=["Task Comments"])
-
-
-def _user_can_access_task(task: Task, user: User) -> bool:
-    if task.creator_id == user.id or task.owner_id == user.id:
-        return True
-    if task.executor_id == user.id:
-        return True
-    return any(o.id == user.id for o in (task.observers or []))
 
 
 async def _get_task_with_access(task_id: str, db: AsyncSession, user: User) -> Task | None:
@@ -26,7 +19,7 @@ async def _get_task_with_access(task_id: str, db: AsyncSession, user: User) -> T
         .where(Task.id == task_id)
     )
     task = result.scalar_one_or_none()
-    if not task or not _user_can_access_task(task, user):
+    if not task or not await user_can_access_task(db, task, user):
         return None
     return task
 
@@ -36,7 +29,7 @@ async def update_comment(
     comment_id: str,
     data: TaskCommentUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     result = await db.execute(
         select(TaskComment).options(selectinload(TaskComment.user)).where(TaskComment.id == comment_id)
@@ -61,7 +54,7 @@ async def update_comment(
 async def delete_comment(
     comment_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     result = await db.execute(select(TaskComment).where(TaskComment.id == comment_id))
     comment = result.scalar_one_or_none()

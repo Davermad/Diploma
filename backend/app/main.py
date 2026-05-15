@@ -1,13 +1,25 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, projects, tasks, categories, stats, comments, websocket_chat
+from app.api import (
+    auth,
+    categories,
+    comments,
+    crm_activity,
+    notifications,
+    projects,
+    search,
+    sprints,
+    stats,
+    tasks,
+    websocket_chat,
+)
 from app.db.config import engine
 from app.models.base import Base
 
-app = FastAPI(title="Smart TODO API")
+app = FastAPI(title="PulseCRM API", description="Мини-CRM: проекты, спринты, задачи, учёт времени, активность")
 
-# Явный origin / regex: с Authorization + другой порт (5173 vs 8000) браузеру нужен
+# Явный origin / regex: с Authorization + другой порт (5173 vs 4000) браузеру нужен
 # конкретный Access-Control-Allow-Origin, не «тихий» ответ без CORS на 500.
 app.add_middleware(
     CORSMiddleware,
@@ -26,8 +38,12 @@ async def startup():
 
 app.include_router(auth.router)
 app.include_router(projects.router)
+app.include_router(sprints.router)
 app.include_router(tasks.router)
 app.include_router(categories.router)
 app.include_router(stats.router)
 app.include_router(comments.router)
+app.include_router(crm_activity.router)
+app.include_router(notifications.router)
+app.include_router(search.router)
 app.include_router(websocket_chat.router)

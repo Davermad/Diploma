@@ -5,7 +5,16 @@ from sqlalchemy.orm import selectinload
 
 from app.db.config import get_db
 from app.models.base import Project, User, ProjectMessage, project_members
-from app.schemas.schemas import ProjectCreate, ProjectUpdate, Project as ProjectSchema, ProjectMessageCreate, ProjectMessage as ProjectMessageSchema, ProjectMemberAdd
+from app.schemas.schemas import (
+    ProjectCreate,
+    ProjectMemberOut,
+    ProjectMemberAdd,
+    ProjectMessageCreate,
+    ProjectMessage as ProjectMessageSchema,
+    ProjectUpdate,
+    Project as ProjectSchema,
+    UserOut,
+)
 from app.api.auth import get_current_user
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
@@ -36,7 +45,11 @@ async def create_project(
     await db.flush()
     # Явная вставка в association: append() к M2M в async-сессии часто даёт MissingGreenlet / 500
     await db.execute(
-        insert(project_members).values(project_id=new_project.id, user_id=current_user.id)
+        insert(project_members).values(
+            project_id=new_project.id,
+            user_id=current_user.id,
+            role="ADMIN",
+        )
     )
     await db.commit()
     # members в response_model — без selectinload сериализация тянет lazy → MissingGreenlet
@@ -172,9 +185,33 @@ async def add_project_member(
     if dup:
         return {"status": "already_member"}
 
-    await db.execute(insert(project_members).values(project_id=project_id, user_id=user_id))
+    await db.execute(
+        insert(project_members).values(project_id=project_id, user_id=user_id, role=data.role)
+    )
     await db.commit()
     return {"status": "added"}
+
+
+@router.get("/{project_id}/members", response_model=list[ProjectMemberOut])
+async def list_project_members(
+    project_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    project = await _get_project_with_access(project_id, db, current_user)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    result = await db.execute(
+        select(User, project_members.c.role)
+        .join(project_members, User.id == project_members.c.user_id)
+        .where(project_members.c.project_id == project_id)
+    )
+    rows = result.all()
+    return [
+        ProjectMemberOut(user=UserOut.model_validate(user_row), role=role_val or "MEMBER")
+        for user_row, role_val in rows
+    ]
 
 
 @router.post("/{project_id}/chat/messages", response_model=ProjectMessageSchema)

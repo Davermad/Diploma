@@ -8,7 +8,7 @@ from sqlalchemy import select
 
 from app.db.config import get_db
 from app.models.base import User
-from app.schemas.schemas import UserCreate, UserOut, Token
+from app.schemas.schemas import UserCreate, UserOut, Token, UserUpdate
 import os
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -84,7 +84,8 @@ async def register(
         )
     user = User(
         email=user_data.email,
-        hashed_password=get_password_hash(user_data.password)
+        hashed_password=get_password_hash(user_data.password),
+        display_name=user_data.display_name,
     )
     db.add(user)
     await db.commit()
@@ -111,4 +112,17 @@ async def login(
 
 @router.get("/me", response_model=UserOut)
 async def get_me(current_user: User = Depends(get_current_user)):
+    return current_user
+
+
+@router.patch("/me", response_model=UserOut)
+async def patch_me(
+    body: UserUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if body.display_name is not None:
+        current_user.display_name = body.display_name.strip() or None
+    await db.commit()
+    await db.refresh(current_user)
     return current_user

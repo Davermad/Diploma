@@ -26,6 +26,7 @@ const taskForm = ref({
   description: '',
   status: 'TODO',
   priority: 'MEDIUM',
+  issue_type: 'TASK',
   category_ids: [],
   executor_id: null,
 })
@@ -33,16 +34,31 @@ const saving = ref(false)
 const completingTaskId = ref(null)
 
 const statusOpts = [
+  { value: 'BACKLOG', label: 'Бэклог' },
   { value: 'TODO', label: 'К выполнению' },
   { value: 'IN_PROGRESS', label: 'В работе' },
-  { value: 'DONE', label: 'Выполнено' },
+  { value: 'REVIEW', label: 'Ревью' },
+  { value: 'DONE', label: 'Готово' },
 ]
 const priorityOpts = [
   { value: 'LOW', label: 'Низкий' },
   { value: 'MEDIUM', label: 'Средний' },
   { value: 'HIGH', label: 'Высокий' },
 ]
-const statusLabels = { TODO: 'К выполнению', IN_PROGRESS: 'В работе', DONE: 'Готово' }
+const issueTypeOpts = [
+  { value: 'TASK', label: 'Задача' },
+  { value: 'BUG', label: 'Баг' },
+  { value: 'FEATURE', label: 'Фича' },
+  { value: 'EPIC', label: 'Эпик' },
+]
+
+const statusLabels = {
+  BACKLOG: 'Бэклог',
+  TODO: 'К выполнению',
+  IN_PROGRESS: 'В работе',
+  REVIEW: 'Ревью',
+  DONE: 'Готово',
+}
 
 const memberOptions = computed(() => {
   const m = project.value?.members
@@ -166,6 +182,7 @@ async function createTask() {
       description: '',
       status: 'TODO',
       priority: 'MEDIUM',
+      issue_type: 'TASK',
       category_ids: [],
       executor_id: null,
     }
@@ -248,7 +265,7 @@ async function saveProject() {
                 <span v-if="task.executor" class="task-exec">→ {{ task.executor.email }}</span>
               </div>
               <div class="task-item-right">
-                <span class="task-status">{{ statusLabels[task.status] || task.status }}</span>
+                <span class="task-status">[{{ task.issue_type || 'TASK' }}] {{ statusLabels[task.status] || task.status }}</span>
                 <a-button
                   v-if="user && task.status !== 'DONE'"
                   type="primary"
@@ -307,6 +324,12 @@ async function saveProject() {
             :options="memberOptions.map((u) => ({ value: u.id, label: u.email }))"
           />
           <p class="field-hint">Только участники проекта.</p>
+        </a-form-item>
+        <a-form-item label="Тип задачи">
+          <a-select
+            v-model:value="taskForm.issue_type"
+            :options="issueTypeOpts.map((o) => ({ value: o.value, label: o.label }))"
+          />
         </a-form-item>
         <a-form-item label="Статус">
           <a-select v-model:value="taskForm.status" :options="statusOpts.map((o) => ({ value: o.value, label: o.label }))" />

@@ -12,6 +12,7 @@ from sqlalchemy.orm import selectinload
 from app.db.config import AsyncSessionLocal, get_db
 from app.models.base import User, Task, TaskComment, GlobalMessage
 from app.api.auth import get_current_user
+from app.services.task_access import user_can_access_task
 from app.schemas.schemas import GlobalMessage as GlobalMessageSchema, GlobalMessageCreate
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
@@ -56,14 +57,6 @@ async def get_user_from_token(token: str) -> Optional[User]:
     async with AsyncSessionLocal() as db:
         result = await db.execute(select(User).where(User.id == user_id))
         return result.scalar_one_or_none()
-
-
-def _user_can_access_task(task: Task, user: User) -> bool:
-    if task.creator_id == user.id or task.owner_id == user.id:
-        return True
-    if task.executor_id == user.id:
-        return True
-    return any(o.id == user.id for o in (task.observers or []))
 
 
 @router.get("/global/messages", response_model=list[GlobalMessageSchema])
@@ -169,7 +162,7 @@ async def websocket_task_chat(
             .where(Task.id == task_id)
         )
         task = result.scalar_one_or_none()
-        if not task or not _user_can_access_task(task, user):
+        if not task or not await user_can_access_task(db, task, user):
             await websocket.close(code=4003)
             return
 

@@ -10,17 +10,32 @@ import { FormItem } from '../components/FormItem'
 import { CategoryBadges } from '../components/CategoryBadges'
 import { CategoryPicker } from '../components/CategoryPicker'
 
-const statusLabels = { TODO: 'К выполнению', IN_PROGRESS: 'В работе', DONE: 'Выполнено' }
+const statusLabels = {
+  BACKLOG: 'Бэклог',
+  TODO: 'К выполнению',
+  IN_PROGRESS: 'В работе',
+  REVIEW: 'Ревью',
+  DONE: 'Готово',
+}
 const priorityLabels = { LOW: 'Низкий', MEDIUM: 'Средний', HIGH: 'Высокий' }
+const issueTypeLabels = { TASK: 'Задача', BUG: 'Баг', FEATURE: 'Фича', EPIC: 'Эпик' }
 const statusOpts = [
+  { value: 'BACKLOG', label: 'Бэклог' },
   { value: 'TODO', label: 'К выполнению' },
   { value: 'IN_PROGRESS', label: 'В работе' },
-  { value: 'DONE', label: 'Выполнено' },
+  { value: 'REVIEW', label: 'Ревью' },
+  { value: 'DONE', label: 'Готово' },
 ]
 const priorityOpts = [
   { value: 'LOW', label: 'Низкий' },
   { value: 'MEDIUM', label: 'Средний' },
   { value: 'HIGH', label: 'Высокий' },
+]
+const issueTypeOpts = [
+  { value: 'TASK', label: 'Задача' },
+  { value: 'BUG', label: 'Баг' },
+  { value: 'FEATURE', label: 'Фича' },
+  { value: 'EPIC', label: 'Эпик' },
 ]
 
 export function TaskDetailPage() {
@@ -39,11 +54,13 @@ export function TaskDetailPage() {
   const [loading, setLoading] = useState(true)
   const [wsConnected, setWsConnected] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
+  const [myProjectRole, setMyProjectRole] = useState(null)
   const [editForm, setEditForm] = useState({
     title: '',
     description: '',
     status: 'TODO',
     priority: 'MEDIUM',
+    issue_type: 'TASK',
     deadline: '',
   })
   const [savingEdit, setSavingEdit] = useState(false)
@@ -58,7 +75,12 @@ export function TaskDetailPage() {
   }, [projectForTask])
 
   const canEditTask =
-    user && task && (user.id === task.creator_id || user.id === task.owner_id)
+    user &&
+    task &&
+    (user.id === task.creator_id ||
+      user.id === task.owner_id ||
+      (projectForTask && user.id === projectForTask.owner_id) ||
+      myProjectRole === 'ADMIN')
 
   async function load() {
     if (!taskId) return
@@ -70,7 +92,14 @@ export function TaskDetailPage() {
       const [t, cats] = await Promise.all([tasksApi.get(taskId), categoriesApi.list().catch(() => [])])
       setTask(t)
       setExecutorId(t.executor_id || '')
-      setProjectForTask(t.project_id ? await projectsApi.get(t.project_id).catch(() => null) : null)
+      const proj = t.project_id ? await projectsApi.get(t.project_id).catch(() => null) : null
+      setProjectForTask(proj)
+      let role = null
+      if (t.project_id && user) {
+        const mems = await projectsApi.members(t.project_id).catch(() => [])
+        role = mems.find((m) => m.user?.id === user.id)?.role ?? null
+      }
+      setMyProjectRole(role)
       setAllCategories(cats)
       setCategoryIds((t.categories || []).map((c) => c.id))
       setComments(await tasksApi.getComments(taskId))
@@ -99,7 +128,7 @@ export function TaskDetailPage() {
   useEffect(() => {
     load()
     return () => wsRef.current?.close()
-  }, [taskId])
+  }, [taskId, user?.id])
 
   async function sendComment() {
     const text = newComment.trim()
@@ -138,6 +167,7 @@ export function TaskDetailPage() {
       description: task.description || '',
       status: task.status,
       priority: task.priority,
+      issue_type: task.issue_type || 'TASK',
       deadline: task.deadline ? String(task.deadline).slice(0, 16) : '',
     })
     setEditOpen(true)
@@ -152,6 +182,7 @@ export function TaskDetailPage() {
         description: editForm.description,
         status: editForm.status,
         priority: editForm.priority,
+        issue_type: editForm.issue_type,
         deadline: editForm.deadline ? new Date(editForm.deadline).toISOString() : null,
       }
       const updated = await tasksApi.update(taskId, payload)
@@ -254,6 +285,20 @@ export function TaskDetailPage() {
             </>
           )}
         </div>
+        {!canEditTask && user && (
+          <p
+            style={{
+              marginTop: 14,
+              marginBottom: 0,
+              fontSize: '0.875rem',
+              color: 'var(--text-muted)',
+              maxWidth: '52ch',
+              lineHeight: 1.45,
+            }}
+          >
+            Полное редактирование доступно автору задачи, владельцу проекта или участнику с ролью ADMIN в этом проекте.
+          </p>
+        )}
       </div>
 
       <div className="grid-2">
@@ -267,6 +312,12 @@ export function TaskDetailPage() {
                 Статус
               </dt>
               <dd style={{ margin: 0, fontWeight: 500 }}>{statusLabels[task.status] || task.status}</dd>
+            </div>
+            <div>
+              <dt style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 4px' }}>
+                Тип
+              </dt>
+              <dd style={{ margin: 0, fontWeight: 500 }}>{issueTypeLabels[task.issue_type] || task.issue_type}</dd>
             </div>
             <div>
               <dt style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 4px' }}>
@@ -366,6 +417,19 @@ export function TaskDetailPage() {
               onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
               placeholder="Описание"
             />
+          </FormItem>
+          <FormItem label="Тип задачи">
+            <select
+              style={selectStyle}
+              value={editForm.issue_type}
+              onChange={(e) => setEditForm((f) => ({ ...f, issue_type: e.target.value }))}
+            >
+              {issueTypeOpts.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
           </FormItem>
           <FormItem label="Статус">
             <select

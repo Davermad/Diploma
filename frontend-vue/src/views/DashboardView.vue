@@ -5,7 +5,13 @@ import PageCard from '../components/PageCard.vue'
 
 const data = ref(null)
 const loading = ref(true)
-const statusLabels = { TODO: 'К выполнению', IN_PROGRESS: 'В работе', DONE: 'Выполнено' }
+const statusLabels = {
+  BACKLOG: 'Бэклог',
+  TODO: 'К выполнению',
+  IN_PROGRESS: 'В работе',
+  REVIEW: 'Ревью',
+  DONE: 'Готово',
+}
 
 const statusEntries = computed(() => Object.entries(data.value?.by_status || {}))
 
@@ -23,7 +29,9 @@ onMounted(async () => {
 <template>
   <div class="page-shell">
     <h1>Дашборд</h1>
-    <p class="page-lead">Сводка по задачам: статусы, просроченные и недавно завершённые.</p>
+    <p class="page-lead">
+      Интерфейс на базе Ant Design Vue: готовые таблицы, сетки и контролы ускоряют сборку «enterprise»-CRM без верстки с нуля.
+    </p>
     <a-spin v-if="loading" />
     <template v-else-if="data">
       <a-row :gutter="[20, 20]">

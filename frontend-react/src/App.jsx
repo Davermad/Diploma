@@ -6,6 +6,7 @@ import { AppLayout } from './layout/AppLayout'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { DashboardPage } from './pages/DashboardPage'
+import { KanbanBoardPage } from './pages/KanbanBoardPage'
 import { ProjectsPage } from './pages/ProjectsPage'
 import { ProjectDetailPage } from './pages/ProjectDetailPage'
 import { TaskDetailPage } from './pages/TaskDetailPage'
@@ -82,6 +83,7 @@ function AppRoutes() {
       <Route path="/register" element={<RegisterRoute />} />
       <Route element={<ProtectedLayout />}>
         <Route index element={<DashboardPage />} />
+        <Route path="board" element={<KanbanBoardPage />} />
         <Route path="projects" element={<ProjectsPage />} />
         <Route path="projects/:id" element={<ProjectDetailPage />} />
         <Route path="tasks/:id" element={<TaskDetailPage />} />

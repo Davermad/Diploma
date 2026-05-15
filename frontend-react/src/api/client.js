@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 export function formatApiError(body) {
   if (body == null) return 'Ошибка запроса'
@@ -51,9 +51,14 @@ export const auth = {
       r.ok ? r.json() : r.json().then((e) => Promise.reject(new Error(formatApiError(e))))
     )
   },
-  register: (email, password) =>
-    request('/auth/register', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  register: (email, password, display_name) =>
+    request('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, display_name }),
+    }),
   me: () => request('/auth/me'),
+  patchMe: (display_name) =>
+    request('/auth/me', { method: 'PATCH', body: JSON.stringify({ display_name }) }),
 }
 
 export const projects = {
@@ -62,18 +67,26 @@ export const projects = {
   create: (data) => request('/projects/', { method: 'POST', body: JSON.stringify(data) }),
   update: (id, data) => request(`/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   delete: (id) => request(`/projects/${id}`, { method: 'DELETE' }),
+  members: (projectId) => request(`/projects/${projectId}/members`),
   getChat: (id, skip = 0, limit = 50) =>
     request(`/projects/${id}/chat/messages?skip=${skip}&limit=${limit}`),
   sendMessage: (id, text) =>
     request(`/projects/${id}/chat/messages`, { method: 'POST', body: JSON.stringify({ text }) }),
   addMember: (projectId, body) =>
     request(`/projects/${projectId}/members`, { method: 'POST', body: JSON.stringify(body) }),
+  listSprints: (projectId) => request(`/projects/${projectId}/sprints`),
+  createSprint: (projectId, data) =>
+    request(`/projects/${projectId}/sprints`, { method: 'POST', body: JSON.stringify(data) }),
 }
 
 export const tasks = {
   list: (params = {}) => {
-    const q = new URLSearchParams(params).toString()
-    return request(`/tasks${q ? '?' + q : ''}`)
+    const q = new URLSearchParams()
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') q.set(k, String(v))
+    })
+    const qs = q.toString()
+    return request(`/tasks${qs ? '?' + qs : ''}`)
   },
   get: (id) => request(`/tasks/${id}`),
   create: (data) => request('/tasks/', { method: 'POST', body: JSON.stringify(data) }),
@@ -83,6 +96,10 @@ export const tasks = {
     request(`/tasks/${id}/comments?skip=${skip}&limit=${limit}`),
   addComment: (id, text) =>
     request(`/tasks/${id}/comments`, { method: 'POST', body: JSON.stringify({ text }) }),
+  listWorkLogs: (id, skip = 0, limit = 50) =>
+    request(`/tasks/${id}/work-logs?skip=${skip}&limit=${limit}`),
+  addWorkLog: (id, body) =>
+    request(`/tasks/${id}/work-logs`, { method: 'POST', body: JSON.stringify(body) }),
 }
 
 export const categories = {
@@ -103,6 +120,26 @@ export const chat = {
     request(`/chat/global/messages?skip=${skip}&limit=${limit}`),
   sendGlobalMessage: (text) =>
     request('/chat/global/messages', { method: 'POST', body: JSON.stringify({ text }) }),
+}
+
+export const notifications = {
+  list: (unreadOnly = false, limit = 40) =>
+    request(`/notifications/?unread_only=${unreadOnly}&limit=${limit}`),
+  markRead: (id) => request(`/notifications/${id}/read`, { method: 'POST' }),
+  markAllRead: () => request('/notifications/read-all', { method: 'POST' }),
+}
+
+export const activity = {
+  feed: ({ limit = 40, task_id, project_id } = {}) => {
+    const q = new URLSearchParams({ limit: String(limit) })
+    if (task_id) q.set('task_id', task_id)
+    if (project_id) q.set('project_id', project_id)
+    return request(`/activity/?${q}`)
+  },
+}
+
+export const searchApi = {
+  query: (q) => request(`/search/?q=${encodeURIComponent(q)}`),
 }
 
 export function getWsUrl(path) {

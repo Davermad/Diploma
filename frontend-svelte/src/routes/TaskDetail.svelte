@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { push } from 'svelte-spa-router';
+  import { get } from 'svelte/store';
   import { tasks as tasksApi, categories as categoriesApi, projects as projectsApi } from '../lib/api.js';
   import { user } from '../lib/stores.js';
   import Card from '../lib/components/Card.svelte';
@@ -27,8 +28,10 @@
   let loading = $state(true);
   let ws = $state(null);
   let wsConnected = $state(false);
+  let myProjectRole = $state(null);
 
   $effect(() => {
+    void $user?.id;
     if (taskId) load();
   });
 
@@ -48,6 +51,12 @@
       projectForTask = t.project_id
         ? await projectsApi.get(t.project_id).catch(() => null)
         : null;
+      const u = get(user);
+      myProjectRole = null;
+      if (t.project_id && u) {
+        const mems = await projectsApi.members(t.project_id).catch(() => []);
+        myProjectRole = mems.find((m) => m.user?.id === u.id)?.role ?? null;
+      }
       allCategories = cats;
       categoryIds = (t.categories || []).map((c) => c.id);
       comments = await tasksApi.getComments(taskId);
@@ -106,8 +115,15 @@
     }
   }
 
-  const statusLabels = { TODO: 'К выполнению', IN_PROGRESS: 'В работе', DONE: 'Выполнено' };
+  const statusLabels = {
+    BACKLOG: 'Бэклог',
+    TODO: 'К выполнению',
+    IN_PROGRESS: 'В работе',
+    REVIEW: 'Ревью',
+    DONE: 'Готово',
+  };
   const priorityLabels = { LOW: 'Низкий', MEDIUM: 'Средний', HIGH: 'Высокий' };
+  const issueTypeLabels = { TASK: 'Задача', BUG: 'Баг', FEATURE: 'Фича', EPIC: 'Эпик' };
 
   let memberOptions = $derived.by(() => {
     const p = projectForTask;
@@ -116,9 +132,16 @@
     return [...byId.values()].sort((a, b) => (a.email || '').localeCompare(b.email || ''));
   });
 
-  let canEditTask = $derived(
-    $user && task && ($user.id === task.creator_id || $user.id === task.owner_id)
-  );
+  let canEditTask = $derived.by(() => {
+    const u = $user;
+    if (!u || !task) return false;
+    return (
+      u.id === task.creator_id ||
+      u.id === task.owner_id ||
+      (projectForTask && u.id === projectForTask.owner_id) ||
+      myProjectRole === 'ADMIN'
+    );
+  });
 
   let editOpen = $state(false);
   let editForm = $state({
@@ -126,20 +149,29 @@
     description: '',
     status: 'TODO',
     priority: 'MEDIUM',
+    issue_type: 'TASK',
     deadline: '',
   });
   let savingEdit = $state(false);
   let completing = $state(false);
 
   const statusOpts = [
+    { value: 'BACKLOG', label: 'Бэклог' },
     { value: 'TODO', label: 'К выполнению' },
     { value: 'IN_PROGRESS', label: 'В работе' },
-    { value: 'DONE', label: 'Выполнено' },
+    { value: 'REVIEW', label: 'Ревью' },
+    { value: 'DONE', label: 'Готово' },
   ];
   const priorityOpts = [
     { value: 'LOW', label: 'Низкий' },
     { value: 'MEDIUM', label: 'Средний' },
     { value: 'HIGH', label: 'Высокий' },
+  ];
+  const issueTypeOpts = [
+    { value: 'TASK', label: 'Задача' },
+    { value: 'BUG', label: 'Баг' },
+    { value: 'FEATURE', label: 'Фича' },
+    { value: 'EPIC', label: 'Эпик' },
   ];
 
   function openTaskEdit() {
@@ -149,6 +181,7 @@
       description: task.description || '',
       status: task.status,
       priority: task.priority,
+      issue_type: task.issue_type || 'TASK',
       deadline: task.deadline ? String(task.deadline).slice(0, 16) : '',
     };
     editOpen = true;
@@ -163,6 +196,7 @@
         description: editForm.description,
         status: editForm.status,
         priority: editForm.priority,
+        issue_type: editForm.issue_type,
       };
       payload.deadline = editForm.deadline ? new Date(editForm.deadline).toISOString() : null;
       const updated = await tasksApi.update(taskId, payload);
@@ -240,6 +274,12 @@
             <Button type="danger" size="sm" on:click={deleteTask}>Удалить задачу</Button>
           </div>
         {/if}
+        {#if !canEditTask}
+          <p class="hint subtle">
+            Полное редактирование доступно автору задачи, владельцу проекта или участнику с ролью ADMIN. Исполнитель без этих
+            прав может менять в основном статус (кнопка «Завершить»).
+          </p>
+        {/if}
       </div>
     </div>
 
@@ -250,6 +290,10 @@
           <div>
             <dt>Статус</dt>
             <dd>{statusLabels[task.status] || task.status}</dd>
+          </div>
+          <div>
+            <dt>Тип</dt>
+            <dd>{issueTypeLabels[task.issue_type] || task.issue_type}</dd>
           </div>
           <div>
             <dt>Приоритет</dt>
@@ -323,6 +367,13 @@
     </FormItem>
     <FormItem label="Описание">
       <Input bind:value={editForm.description} placeholder="Описание" />
+    </FormItem>
+    <FormItem label="Тип задачи">
+      <select bind:value={editForm.issue_type} class="select">
+        {#each issueTypeOpts as opt}
+          <option value={opt.value}>{opt.label}</option>
+        {/each}
+      </select>
     </FormItem>
     <FormItem label="Статус">
       <select bind:value={editForm.status} class="select">
@@ -446,6 +497,11 @@
     color: var(--text-muted);
     margin: 0 0 12px;
     line-height: 1.45;
+  }
+  .hint.subtle {
+    margin-top: 12px;
+    margin-bottom: 0;
+    max-width: 52ch;
   }
   .chat-messages {
     max-height: 320px;
