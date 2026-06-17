@@ -120,7 +120,7 @@ async function load() {
 
 async function addMember() {
   const em = inviteEmail.value.trim()
-  if (!em) return
+  if (!em || inviting.value) return
   inviting.value = true
   try {
     const r = await projectsApi.addMember(projectId.value, { email: em })
@@ -247,10 +247,10 @@ async function saveProject() {
         </ul>
         <a-form layout="inline" @finish="addMember">
           <a-form-item>
-            <a-input v-model:value="inviteEmail" type="email" placeholder="email коллеги" style="min-width: 220px" />
+            <a-input v-model:value="inviteEmail" type="email" placeholder="email коллеги" style="min-width: 220px" @press-enter="addMember" />
           </a-form-item>
           <a-form-item>
-            <a-button type="primary" html-type="submit" :loading="inviting">Добавить в проект</a-button>
+            <a-button type="primary" html-type="submit" :loading="inviting" @click="addMember">Добавить в проект</a-button>
           </a-form-item>
         </a-form>
       </PageCard>
