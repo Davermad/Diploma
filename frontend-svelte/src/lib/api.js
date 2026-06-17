@@ -89,7 +89,7 @@ export const tasks = {
       if (v !== undefined && v !== null && v !== '') q.set(k, String(v));
     });
     const qs = q.toString();
-    return request(`/tasks${qs ? '?' + qs : ''}`);
+    return request(`/tasks/${qs ? '?' + qs : ''}`);
   },
   get: (id) => request(`/tasks/${id}`),
   create: (data) => request('/tasks/', { method: 'POST', body: JSON.stringify(data) }),
