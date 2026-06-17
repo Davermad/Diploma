@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -17,12 +19,18 @@ from app.api import (
 from app.db.config import engine
 from app.models.base import Base
 
+
+def _parse_cors_origins() -> list[str]:
+    value = os.getenv("CORS_ORIGINS", "")
+    return [origin.strip() for origin in value.split(",") if origin.strip()]
+
 app = FastAPI(title="PulseCRM API", description="Мини-CRM: проекты, спринты, задачи, учёт времени, активность")
 
 # Явный origin / regex: с Authorization + другой порт (5173 vs 4000) браузеру нужен
 # конкретный Access-Control-Allow-Origin, не «тихий» ответ без CORS на 500.
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=_parse_cors_origins(),
     allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
