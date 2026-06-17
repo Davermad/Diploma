@@ -138,5 +138,3 @@ frontend-vue/
 frontend-svelte/
 docker-compose.yml
 ```
-
-Лицензия и точное ТЗ — по условиям вашего учебного заведения.
